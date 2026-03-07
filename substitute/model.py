@@ -46,4 +46,15 @@ class SubstituteModel(nn.Model):
             return out 
 
 
+        def add_optimizer(self,lr: float =1e-3):
+
+            self.optimizer=torch.optim.SGD(self.parameters(),lr=lr,mommentum=0.9)
+
+
+        def get_loss(self,predicition_batch :Tensor, class_batch: Tensor) -> Tensor:
+            loss=F.nll_loss(prediciton_batch,class_batch.squeeze())
+            return loss
+
+
+        def _fit_batch(self,images_batches,class_batch):
             
