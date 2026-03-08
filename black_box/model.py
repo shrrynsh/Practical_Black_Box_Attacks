@@ -12,7 +12,7 @@ class BlackBoxModel(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=3,stride=2),
             nn.Conv2d(in_channels=32,out_channels=64,kernel_size=3,stride=1),
-            nn.ReLU()
+            nn.ReLU(),
             nn.MaxPool2d(kernel_size=3,stride=2),
         )
 
@@ -24,7 +24,7 @@ class BlackBoxModel(nn.Module):
             nn.ReLU(),
             nn.Dropout(p=0.5),
             nn.Linear(1024,512),
-            nn.ReLU()
+            nn.ReLU(),
             nn.Linear(512,num_classes),
         )
 
@@ -34,6 +34,6 @@ class BlackBoxModel(nn.Module):
         out=self.avgpool(out)
         out=torch.flatten(out)
         out=self.classifier(out)
-        out=F.log_softmax(out,dim=1)
+        out=F.log_softmax(out,dim=-1)
 
         return out 
