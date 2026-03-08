@@ -8,13 +8,13 @@ from torch.utils.data import DataLoader,Dataset
 
 from torchvision.utils import save_image
 
-from tqdm.notebook import tqdm, trange
+from tqdm import tqdm, trange
 from typing import Optional
 
-device=troch.device("cuda" if torch.cuda.is_available() else 'cpu')
+device=torch.device("cuda" if torch.cuda.is_available() else 'cpu')
 
 
-class SubstituteModel(nn.Model):
+class SubstituteModel(nn.Module):
     def __init__(self,num_classes : int =10) -> None:
         super(SubstituteModel,self).__init__()
 
@@ -37,7 +37,7 @@ class SubstituteModel(nn.Model):
 
 
 
-        def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> Tensor:
             out=self.conv(x)
             out=torch.flatten(out,1)
             out=self.classifier(out)
@@ -46,17 +46,17 @@ class SubstituteModel(nn.Model):
             return out 
 
 
-        def add_optimizer(self,lr: float =1e-3):
+    def add_optimizer(self,lr: float =1e-3):
 
-            self.optimizer=torch.optim.SGD(self.parameters(),lr=lr,mommentum=0.9)
+            self.optimizer=torch.optim.SGD(self.parameters(),lr=lr,momentum=0.9)
 
 
-        def get_loss(self,predicition_batch :Tensor, class_batch: Tensor) -> Tensor:
+    def get_loss(self,predicition_batch :Tensor, class_batch: Tensor) -> Tensor:
             loss=F.nll_loss(prediciton_batch,class_batch.squeeze())
             return loss
 
 
-        def _fit_batch(self,images_batches,class_batch):
+    def _fit_batch(self,images_batches,class_batch):
             images_batch,class_batch=images_batch.to(device),class_batch.to(device)
             self.optimizer.zero_grad()
             pred_batch=self(images_batch)
@@ -68,36 +68,36 @@ class SubstituteModel(nn.Model):
 
 
 
-        def train_epoch(
-            self,train_data :DataLoader,epoch :int,batch_size: Optionl[int]=None
+    def train_epoch(
+            self,train_data :DataLoader,epoch :int,batch_size: Optional[int]=None
         ) ->  float:
 
-        self.train()
-        desc=f"Epoch{epoch}"
-        total=len(train_data)*batch_size if batch_size else len(train_data)
-        bar_fmt = "{l_bar}{bar}| [{elapsed}<{remaining}{postfix}]"
+            self.train()
+            desc=f"Epoch{epoch}"
+            total=len(train_data)*batch_size if batch_size else len(train_data)
+            bar_fmt = "{l_bar}{bar}| [{elapsed}<{remaining}{postfix}]"
 
-        trn_loss=0
-        trn_done=0
+            trn_loss=0
+            trn_done=0
 
-        pbar=tqdm(
-            trian_data,
-            desc=desc,
-            total=total,
-            leave=False,
-            miniters=1,
-            unit_scale=True,
-            bar_format=bar_fmt,
-            position=1,
-        )
+            pbar=tqdm(
+                train_data,
+                desc=desc,
+                total=total,
+                leave=False,
+                miniters=1,
+                unit_scale=True,
+                bar_format=bar_fmt,
+                position=1,
+            )
 
-        for imgs,labels in pbar:
-            loss=self._fit_batch(images,labels)
-            trn_loss+=loss.item()*images.shape[0]
-            trn_done+=images.shape[0]
+            for imgs,labels in pbar:
+                loss=self._fit_batch(images,labels)
+                trn_loss+=loss.item()*images.shape[0]
+                trn_done+=images.shape[0]
 
 
-    
+        
 
     def train_model(
         self,
@@ -123,13 +123,13 @@ class SubstituteModel(nn.Model):
 
 
         for epoch in pbar:
-            train_loss=self.train_epoch(trian_data,epoch)
+            train_loss=self.train_epoch(train_data,epoch)
             pbar.set_postfix({"loss": "%.4g" % (train_loss)})
 
 
     def jacobian_data_augmentation(
         self,substitute_dataset: Dataset, p: int,lambda_:float, root_dir:str
-    )  -> None;
+    )  -> None:
 
         if not os.path.exists(root_dir):
             os.mkdir(root_dir)
