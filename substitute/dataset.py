@@ -1,10 +1,10 @@
 import os 
 import torch
-from torch.utils.data import Datasets
-from torchvision import Transforms 
+from torch.utils.data import Dataset
+from torchvision import transforms 
 
 from PIL import Image
-form typing import Callable
+from typing import Callable
 
 
 SAMPLE = {
@@ -25,27 +25,26 @@ INDICES= [item for sublist in list(SAMPLE.values()) for item in sublist]
 
 class SubstituteDataset(Dataset):
     def __init__(
-        self,root_dir : str, get_predicitions : Callable, transform : Callable=None
+        self, root_dir: str, get_predictions: Callable, transform: Callable = None
     ):
-
-    super(SubstituteDataset,self).__init__()
-    self.root_dir=root_dir
-    self.get_predictions=get_predictions
-    self.transform=transform
-    self.images=[file for file in os.listdir(root_dir)]
+        super(SubstituteDataset, self).__init__()
+        self.root_dir = root_dir
+        self.get_predictions = get_predictions
+        self.transform = transform
+        self.images = sorted([file for file in os.listdir(root_dir) if file.endswith(".pt")])
 
     def __len__(self):
         return len(self.images)
 
-    def __getitem__(self,idx):
-        img_name=os.path.join(self.root_dir,f"{idx}.pt")
-        img=torch.load(img_name)
+    def __getitem__(self, idx):
+        img_name = os.path.join(self.root_dir, self.images[idx])
+        img = torch.load(img_name)
 
         if self.transform:
-            img=self.transform(img)
+            img = self.transform(img)
 
-        img_batch=img.unsqueeze(dim=0)
-        label=self.get_predictions(img_batch)
+        img_batch = img.unsqueeze(dim=0)
+        label = self.get_predictions(img_batch)
 
-        return img,label
+        return img, label
         
