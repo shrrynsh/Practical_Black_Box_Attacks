@@ -51,7 +51,7 @@ class SubstituteModel(nn.Module):
             self.optimizer=torch.optim.SGD(self.parameters(),lr=lr,momentum=0.9)
 
 
-    def get_loss(self,predicition_batch :Tensor, class_batch: Tensor) -> Tensor:
+    def get_loss(self,prediction_batch :Tensor, class_batch: Tensor) -> Tensor:
             loss=F.nll_loss(prediction_batch,class_batch.squeeze())
             return loss
 
@@ -96,6 +96,9 @@ class SubstituteModel(nn.Module):
                 trn_loss+=loss.item()*imgs.shape[0]
                 trn_done+=imgs.shape[0]
 
+            # Return mean loss for this epoch so callers can log it.
+            return trn_loss / max(trn_done, 1)
+
 
         
 
@@ -108,23 +111,25 @@ class SubstituteModel(nn.Module):
 
     ) -> float:
 
-
+        train_loss = 0.0
         self.add_optimizer(lr)
         trnbar_fmt = "{l_bar}{bar}| [{elapsed}<{remaining}, {rate_fmt}{postfix}]"
         pbar = tqdm(
-            range(epochs),
-            desc="Training",
-            total=epochs,
-            leave=False,
-            unit="epoch",
-            position=0,
-            bar_format=trnbar_fmt,
-        )
+                range(epochs),
+                desc="Training",
+                total=epochs,
+                leave=False,
+                unit="epoch",
+                position=0,
+                bar_format=trnbar_fmt,
+            )
 
 
         for epoch in pbar:
-            train_loss=self.train_epoch(train_data,epoch)
+            train_loss=self.train_epoch(train_data,epoch,batch_size=batch_size)
             pbar.set_postfix({"loss": "%.4g" % (train_loss)})
+
+        return train_loss
 
 
     def jacobian_data_augmentation(
