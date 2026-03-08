@@ -52,11 +52,11 @@ class SubstituteModel(nn.Module):
 
 
     def get_loss(self,predicition_batch :Tensor, class_batch: Tensor) -> Tensor:
-            loss=F.nll_loss(prediciton_batch,class_batch.squeeze())
+            loss=F.nll_loss(prediction_batch,class_batch.squeeze())
             return loss
 
 
-    def _fit_batch(self,images_batches,class_batch):
+    def _fit_batch(self,images_batch,class_batch):
             images_batch,class_batch=images_batch.to(device),class_batch.to(device)
             self.optimizer.zero_grad()
             pred_batch=self(images_batch)
@@ -92,9 +92,9 @@ class SubstituteModel(nn.Module):
             )
 
             for imgs,labels in pbar:
-                loss=self._fit_batch(images,labels)
-                trn_loss+=loss.item()*images.shape[0]
-                trn_done+=images.shape[0]
+                loss=self._fit_batch(imgs,labels)
+                trn_loss+=loss.item()*imgs.shape[0]
+                trn_done+=imgs.shape[0]
 
 
         
