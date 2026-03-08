@@ -3,7 +3,7 @@ import numpy as np
 import seaborn as sns
 import pandas as pd
 from sklearn.metrics import accuracy_score, confusion_matrix
-from tqdm.notebook import tqdm, trange
+from tqdm import tqdm, trange
 
 import torch
 import torchinfo
@@ -43,21 +43,21 @@ lambda_=0.1,
 ):
 
 
-    substitute_dataset=SubstituteDatset(   
+    substitute_dataset=SubstituteDataset(   
         root_dir='/opt/watchdog/users/shreyansh/adv_diff/adv_ml/Practical_Black_Box_Attacks/substitute/data/training_set_0',
         get_predictions=get_orcale_predictions,
         transform=None
     )
 
-    substitute_mdoel=SubstituteModel()
+    substitute_model=SubstituteModel()
     substitute_model.to(device)
 
-    for p in trange(p_epochs+1,desc='substitute training'):
-        substitute_dataset=SubstituteDatset(   
-        root_dir='/opt/watchdog/users/shreyansh/adv_diff/adv_ml/Practical_Black_Box_Attacks/substitute/data/training_set_{p}',
-        get_predictions=get_orcale_predictions,
-        transform=None
-    )
+    for p in trange(p_epochs + 1, desc='substitute training'):
+        substitute_dataset = SubstituteDataset(
+            root_dir=f'/opt/watchdog/users/shreyansh/adv_diff/adv_ml/Practical_Black_Box_Attacks/substitute/data/training_set_{p}',
+            get_predictions=get_orcale_predictions,
+            transform=None,
+        )
 
         train_dataloader=DataLoader(
             substitute_dataset,
@@ -68,11 +68,11 @@ lambda_=0.1,
 
         substitute_model.train_model(train_dataloader,epochs=epochs,lr=lr)
 
-        substitute_model.jacobian_dataset_augmentation(
+        substitute_model.jacobian_data_augmentation(
             substitute_dataset=substitute_dataset,
             p= (p+1),
             lambda_=lambda_,
-            root_dir=f'src/substitute/data/training_set_{p+1}',
+            root_dir=f'/opt/watchdog/users/shreyansh/adv_diff/adv_ml/Practical_Black_Box_Attacks/substitute/data/training_set_{p+1}',
 
         )
 
